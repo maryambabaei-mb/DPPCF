@@ -1,0 +1,170 @@
+{
+    "columns": [
+        {
+            "name": "LIMIT_BAL",
+            "type": "numerical",
+            "min": 10000,
+            "max": 1000000
+            
+        },
+        {
+            "name": "SEX",
+            "type": "categorical",
+            "representation": [
+                "2",
+                "1"
+            ]
+        },
+        {
+            "name": "EDUCATION",
+            "type": "categorical",
+            "representation": [
+                "2.0",
+                "1.0",
+                "3.0",
+                "4.0"
+            ]
+        },
+        {
+            "name": "MARRIAGE",
+            "type": "categorical",
+            "representation": [
+                "1",
+                "2",
+                "3"
+            ]
+        },
+        {
+            "name": "AGE",
+            "type": "numerical",
+            "min": 18,
+            "max": 100
+        },
+        {
+            "name": "PAY_0",
+            "type": "categorical",
+            "representation": [
+                "0",
+                "1"
+            ]
+        },
+        {
+            "name": "PAY_2",
+            "type": "categorical",
+            "representation": [
+                "0",
+                "1"
+            ]
+        },
+        {
+            "name": "PAY_3",
+            "type": "categorical",
+            "representation": [
+                "0",
+                "1"
+            ]
+        },
+        {
+            "name": "PAY_4",
+            "type": "categorical",
+            "representation": [
+                "0",
+                "1"
+            ]
+        },
+        {
+            "name": "PAY_5",
+            "type": "categorical",
+            "representation": [
+                "0",
+                "1"
+            ]
+        },
+        {
+            "name": "PAY_6",
+            "type": "categorical",
+            "representation": [
+                "0",
+                "1"
+            ]
+        },
+        {
+            "name": "BILL_AMT1",
+            "type": "numerical",
+            "min": 0,
+            "max": 1000000
+        },
+        {
+            "name": "BILL_AMT2",
+            "type": "numerical",
+            "min": 0,
+            "max": 1000000
+        },
+        {
+            "name": "BILL_AMT3",
+            "type": "numerical",
+            "min": 0,
+            "max": 1000000
+        },
+        {
+            "name": "BILL_AMT4",
+            "type": "numerical",
+            "min": 0,
+            "max": 1000000
+        },
+        {
+            "name": "BILL_AMT5",
+            "type": "numerical",
+            "min": 0,
+            "max": 1000000
+        },
+        {
+            "name": "BILL_AMT6",
+            "type": "numerical",
+            "min": 0,
+            "max": 1000000
+        },
+        {
+            "name": "PAY_AMT1",
+            "type": "numerical",
+            "min": 0,
+            "max": 1000000
+        },
+        {
+            "name": "PAY_AMT2",
+            "type": "numerical",
+            "min": 0,
+            "max": 1000000
+        },
+        {
+            "name": "PAY_AMT3",
+            "type": "numerical",
+            "min": 0,
+            "max": 1000000
+        },
+        {
+            "name": "PAY_AMT4",
+            "type": "numerical",
+            "min": 0,
+            "max": 1000000
+        },
+        {
+            "name": "PAY_AMT5",
+            "type": "numerical",
+            "min": 0,
+            "max": 1000000
+        },
+        {
+            "name": "PAY_AMT6",
+            "type": "numerical",
+            "min": 0,
+            "max": 1000000
+        },
+        {
+            "name": "DEFAULT_PAYEMENT",
+            "type": "finite",
+            "representation": ["0", "1"]
+          
+        }
+    ]
+}

@@ -1,0 +1,7 @@
+{
+    "activation": "relu", 
+    "alpha": 0.001,
+    "hidden_layer_sizes":  [50,50],
+    "learning_rate": "constant",
+    "solver": "sgd"
+}
