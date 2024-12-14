@@ -1,0 +1,156 @@
+from reprosyn.methods import MST
+import json 
+import numpy as np
+import pandas as pd
+from pmlb import fetch_data
+from sklearn.preprocessing import KBinsDiscretizer
+import os
+
+
+# DOMAIN_PTH= 'dpnice\domain_adult.json'
+# DOMAIN_PTH= 'dpnice\hospital_discharge_domain.json'
+# DOMAIN_PTH= 'dpnice\informs_domain.json'
+FILE_PATH = 'dpnice\dataset'
+
+# CONTINUOUS_COL=['age', 'capital-gain', 'capital-loss']
+
+
+# def discretisize_continuous_var(df, num_col=CONTINUOUS_COL):
+#     kbin= KBinsDiscretizer(n_bins=100, encode='ordinal', strategy='uniform')
+#     kbin.fit(df[num_col])
+#     df= pd.concat([df.drop(columns=num_col),
+#                     pd.DataFrame(kbin.transform(df[num_col]), columns= num_col)], axis=1)
+
+
+def generate_synth(dataset_name,df,epsilon):
+    # train reprosyn
+    domain_path = ''
+    if dataset_name == 'adult':
+        domain_path = 'dpnice\jsons\domain_adult.json'
+    elif dataset_name == 'hospital':
+        domain_path= 'dpnice\jsons\hospital_discharge_domain.json'
+    elif dataset_name == 'informs':
+        domain_path= 'dpnice\jsons\informs_domain.json'    
+    elif dataset_name == 'compass':
+        domain_path= 'dpnice\jsons\compass_domain.json'    
+    elif dataset_name == 'def_credit':
+        domain_path= 'dpnice\jsons\def_credit_domain_cat.json'    
+
+    else:
+        print('dataset not found')
+        return
+    
+    with open(domain_path, 'r') as js_file:#reposyn read json with json.loads instead of json.load. this  workaround fix the metadata loading issues
+            domaine= json.load(js_file)
+
+    continuous_cols = [col for col in df.columns if df[col].dtype in [np.float64, np.int64]]
+    df, kbin = discretize_continuous_vars(df, continuous_cols)
+
+    ## generate synthetic data
+    gen = MST(dataset=df.copy(), size=df.shape[0] *2, epsilon = epsilon, metadata= domaine['columns'])
+    
+    gen.run()
+    synth= gen.output
+    synth= synth[df.columns]
+
+       # Convert discretized values back to continuous
+    synth[continuous_cols] = kbin.inverse_transform(synth[continuous_cols])
+
+    if dataset_name == 'adult':
+        synth['target']= synth['target'].astype('int64')    #adult
+    elif dataset_name == 'hospital':
+        synth['Total Costs']= synth['Total Costs'].astype('int64') #hospital
+    elif dataset_name == 'informs':
+        synth['income']= synth['income'].astype('int64') #inform
+    
+    elif dataset_name == 'compas':
+        synth['low_risk']= synth['low_risk'].astype('int64') #inform
+    elif dataset_name == 'default_credit':
+        synth['DEFAULT_PAYEMENT']= synth['DEFAULT_PAYEMENT'].astype('int64') #inform
+    
+    return synth
+
+
+
+## recieve parameters, load data and generate and save csv
+def dp_ds(datasetname = 'adult', epsilon = 1000):
+    filename = generate_file_name(datasetname,epsilon)
+    if file_not_exist(filename):
+        if(datasetname == 'adult'):
+            # read adult dataset and drop na
+            dataset = pd.read_csv('dpnice/datasets/{}.csv'.format(datasetname), sep=',', header=[0], on_bad_lines='skip')
+            dataset=dataset.dropna()
+            dataset.reset_index(drop=True, inplace=True)
+            
+
+            #Drop the unnecessary columns for feature set
+            dataset = dataset.drop(columns=['education-num','fnlwgt','native-country'])
+            synth=generate_synth(datasetname,dataset,epsilon)        
+            synth.to_csv('dpnice/datasets/synth_'+str(datasetname) + '_' + str(epsilon) +'.csv', index=False)
+        
+        elif datasetname == 'hospital':
+            dataset = pd.read_csv('dpnice/datasets/hospital_discharge.csv', sep=',', header=[0], on_bad_lines='skip')
+            dataset=dataset.dropna()
+            dataset.reset_index(drop=True, inplace=True)
+
+            synth=generate_synth(datasetname,dataset,epsilon)        
+        
+            synth.to_csv('dpnice/datasets/synth_'+str(datasetname) + '_' + str(epsilon) +'.csv', index=False)
+
+        elif datasetname == 'compas':
+            dataset = pd.read_csv('dpnice/datasets/compas.csv', sep=';', header=[0], on_bad_lines='skip')
+            dataset=dataset.dropna()
+            dataset.reset_index(drop=True, inplace=True)
+
+            synth=generate_synth(datasetname,dataset,epsilon)        
+            synth.to_csv('dpnice/datasets/synth_'+str(datasetname) + '_' + str(epsilon) +'.csv', index=False)
+        
+        elif datasetname == 'informs':
+            dataset = pd.read_csv('dpnice/datasets/informs.csv', sep=';', header=[0], on_bad_lines='skip')
+            dataset=dataset.dropna()
+            dataset.reset_index(drop=True, inplace=True)
+
+            synth=generate_synth(datasetname,dataset,epsilon)        
+            synth.to_csv('dpnice/datasets/synth_'+str(datasetname) + '_' + str(epsilon) +'.csv', index=False)
+        
+        elif datasetname == 'default_credit':
+            dataset = pd.read_csv('dpnice/datasets/default_credit.csv', sep=';', header=[0], on_bad_lines='skip')
+            dataset=dataset.dropna()
+            dataset.reset_index(drop=True, inplace=True)
+
+            synth=generate_synth(datasetname,dataset,epsilon)        
+            synth.to_csv('dpnice/datasets/synth_'+str(datasetname) + '_' + str(epsilon) +'.csv', index=False)
+    else: 
+        print('dataset already generated') 
+
+
+
+def file_not_exist(file_name):
+    
+    if os.path.exists(file_name):
+        # Check if the file is not empty
+        if os.path.getsize(file_name) > 0:
+            return False
+        else:
+            #delete existing file
+            os.remove(file_name)
+            return True
+    else:
+        return True
+
+def discretize_continuous_vars(df, continuous_cols, n_bins=100):
+    kbin = KBinsDiscretizer(n_bins=n_bins, encode='ordinal', strategy='uniform')
+    df[continuous_cols] = kbin.fit_transform(df[continuous_cols])
+    return df, kbin
+    
+     
+def generate_file_name(datasetname = 'adult', epsilon = 1):
+    if epsilon >= 1:
+        epsilon = int(epsilon)
+    file_name = 'dpnice/datasets/synth_'+str(datasetname) + '_' + str(epsilon) +'.csv'
+    return file_name
+
+for dataset in ('default_credit','compas'):
+    for epsilon in (.01,.1,1,5,10):
+        dp_ds(dataset,epsilon)
+        print('dataset {} with epsilon {} generated'.format(dataset,epsilon))
